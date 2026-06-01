@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/designdigest", "destination": "/api/designdigest.js" },
+    { "source": "/", "destination": "/index.html" }
+  ]
+}
