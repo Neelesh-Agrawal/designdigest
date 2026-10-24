@@ -1,542 +1,108 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Designdigest — Your daily design feed</title>
-  <meta name="description" content="Live design inspiration feed from Dribbble, Mobbin, Awwwards, Freepik, UX Collective and more." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: #111111;
-      color: #e8e6df;
-      min-height: 100vh;
-    }
-
-    /* NAV */
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem 2rem;
-      background: #111111;
-      border-bottom: 1px solid #2a2a2a;
-    }
-
-    .nav-left { display: flex; align-items: baseline; gap: 10px; }
-
-    .nav-logo {
-      font-family: 'Space Mono', monospace;
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      color: #e8e6df;
-    }
-
-    .nav-day {
-      font-family: 'Space Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 1.5px;
-      color: #555;
-    }
-
-    .nav-right { display: flex; align-items: center; gap: 12px; }
-
-    .live-badge {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-family: 'Space Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 1px;
-      color: #34d399;
-    }
-
-    .live-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: #34d399;
-      animation: blink 2s ease-in-out infinite;
-    }
-
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
-
-    .refresh-btn {
-      font-family: 'Space Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.5px;
-      padding: 7px 14px;
-      border: 1px solid #333;
-      background: transparent;
-      color: #999;
-      cursor: pointer;
-      border-radius: 2px;
-      transition: all 0.15s;
-    }
-
-    .refresh-btn:hover { border-color: #888; color: #e8e6df; }
-    .refresh-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-
-    /* SOURCES */
-    .sources-bar {
-      background: #161616;
-      border-bottom: 1px solid #2a2a2a;
-      padding: 8px 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      overflow: hidden;
-    }
-
-    .sources-label {
-      font-family: 'Space Mono', monospace;
-      font-size: 9px;
-      letter-spacing: 1.5px;
-      color: #555;
-      flex-shrink: 0;
-    }
-
-    .sources-scroll {
-      display: flex;
-      gap: 6px;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-    .sources-scroll::-webkit-scrollbar { display: none; }
-
-    .source-tag {
-      font-family: 'Space Mono', monospace;
-      font-size: 10px;
-      padding: 3px 10px;
-      border: 1px solid #2a2a2a;
-      border-radius: 20px;
-      color: #666;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    /* CAT TABS */
-    .cat-bar {
-      display: flex;
-      border-bottom: 1px solid #2a2a2a;
-      background: #111111;
-      overflow-x: auto;
-      scrollbar-width: none;
-      padding: 0 2rem;
-    }
-    .cat-bar::-webkit-scrollbar { display: none; }
-
-    .cat-btn {
-      font-family: 'Space Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.5px;
-      padding: 12px 16px;
-      border: none;
-      border-bottom: 2px solid transparent;
-      background: transparent;
-      color: #555;
-      cursor: pointer;
-      transition: all 0.15s;
-      white-space: nowrap;
-      margin-bottom: -1px;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      flex-shrink: 0;
-    }
-
-    .cat-btn:hover { color: #aaa; }
-    .cat-btn.active[data-cat="all"]         { color: #e8e6df; border-bottom-color: #e8e6df; }
-    .cat-btn.active[data-cat="inspiration"] { color: #a78bfa; border-bottom-color: #a78bfa; }
-    .cat-btn.active[data-cat="tools"]       { color: #34d399; border-bottom-color: #34d399; }
-    .cat-btn.active[data-cat="articles"]    { color: #60a5fa; border-bottom-color: #60a5fa; }
-    .cat-btn.active[data-cat="jobs"]        { color: #fbbf24; border-bottom-color: #fbbf24; }
-
-    .cat-count {
-      font-size: 9px;
-      padding: 2px 6px;
-      border-radius: 10px;
-      background: #222;
-      color: #666;
-      min-width: 20px;
-      text-align: center;
-    }
-
-    /* MAIN */
-    .main {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 2rem;
-    }
-
-    /* LOADER */
-    .inline-loader {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.5rem;
-      padding: 6rem 2rem;
-      text-align: center;
-    }
-    .inline-loader.on { display: flex; }
-
-    .loader-dots { display: flex; gap: 6px; }
-    .loader-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: #333;
-      animation: dp 1.2s ease-in-out infinite;
-    }
-    .loader-dot:nth-child(2) { animation-delay: 0.2s; }
-    .loader-dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes dp { 0%,80%,100%{background:#333} 40%{background:#888} }
-
-    .loader-msg {
-      font-family: 'Space Mono', monospace;
-      font-size: 12px;
-      color: #666;
-      max-width: 360px;
-      line-height: 1.7;
-    }
-
-    .loader-sources {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 6px;
-      max-width: 500px;
-    }
-
-    .loader-source-pill {
-      font-family: 'Space Mono', monospace;
-      font-size: 9px;
-      padding: 3px 10px;
-      border: 1px solid #2a2a2a;
-      border-radius: 2px;
-      color: #555;
-      animation: fadeio 3s ease-in-out infinite;
-    }
-
-    .loader-source-pill:nth-child(2) { animation-delay: 0.4s; }
-    .loader-source-pill:nth-child(3) { animation-delay: 0.8s; }
-    .loader-source-pill:nth-child(4) { animation-delay: 1.2s; }
-    .loader-source-pill:nth-child(5) { animation-delay: 1.6s; }
-    .loader-source-pill:nth-child(6) { animation-delay: 2s; }
-    @keyframes fadeio { 0%,100%{opacity:0.3} 50%{opacity:1} }
-
-    /* FEED META */
-    .feed-meta {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.25rem;
-    }
-
-    .feed-label {
-      font-family: 'Space Mono', monospace;
-      font-size: 10px;
-      letter-spacing: 1.5px;
-      color: #555;
-      text-transform: uppercase;
-    }
-
-    .feed-updated {
-      font-family: 'Space Mono', monospace;
-      font-size: 10px;
-      color: #444;
-    }
-
-    /* CARDS GRID */
-    .cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 12px;
-    }
-
-    /* CARD */
-    .card {
-      background: #1c1c1c;
-      border: 1px solid #2a2a2a;
-      border-radius: 6px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      text-decoration: none;
-      color: inherit;
-      transition: border-color 0.2s, background 0.2s, transform 0.2s;
-      cursor: pointer;
-    }
-
-    .card:hover {
-      border-color: #3a3a3a;
-      background: #212121;
-      transform: translateY(-2px);
-    }
-
-    .card-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 14px 0;
-    }
-
-    .cat-pill {
-      font-family: 'Space Mono', monospace;
-      font-size: 9px;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      padding: 3px 9px;
-      border-radius: 3px;
-      font-weight: 700;
-    }
-
-    .cat-pill.inspiration { background: rgba(167,139,250,0.15); color: #a78bfa; }
-    .cat-pill.tools       { background: rgba(52,211,153,0.15);  color: #34d399; }
-    .cat-pill.articles    { background: rgba(96,165,250,0.15);  color: #60a5fa; }
-    .cat-pill.jobs        { background: rgba(251,191,36,0.15);  color: #fbbf24; }
-
-    .card-source {
-      font-family: 'Space Mono', monospace;
-      font-size: 9px;
-      color: #555;
-      letter-spacing: 0.5px;
-    }
-
-    .card-body {
-      padding: 10px 14px 14px;
-      flex: 1;
-    }
-
-    .card-title {
-      font-size: 14px;
-      font-weight: 500;
-      color: #e8e6df;
-      line-height: 1.45;
-      margin-bottom: 7px;
-      letter-spacing: -0.1px;
-    }
-
-    .card-desc {
-      font-size: 12px;
-      color: #888;
-      line-height: 1.65;
-      font-weight: 300;
-    }
-
-    .card-footer {
-      padding: 9px 14px;
-      border-top: 1px solid #252525;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-
-    .card-tags { display: flex; gap: 5px; flex-wrap: wrap; flex: 1; }
-
-    .tag {
-      font-family: 'Space Mono', monospace;
-      font-size: 9px;
-      padding: 2px 7px;
-      background: #222;
-      color: #666;
-      border-radius: 2px;
-    }
-
-    .card-arrow {
-      font-size: 13px;
-      color: #444;
-      flex-shrink: 0;
-      transition: color 0.15s;
-    }
-
-    .card:hover .card-arrow { color: #888; }
-
-    /* CURATED CARD — slightly different treatment */
-    .card.curated {
-      border-color: #2a2a2a;
-      background: #181818;
-    }
-
-    .card.curated:hover { background: #1e1e1e; }
-
-    /* FEATURED */
-    .card.featured { grid-column: span 2; }
-    .card.featured .card-title { font-size: 17px; }
-
-    /* EMPTY */
-    .empty {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 5rem 2rem;
-    }
-
-    .empty-title {
-      font-family: 'Space Mono', monospace;
-      font-size: 13px;
-      color: #888;
-      margin-bottom: 8px;
-    }
-
-    .empty-sub { font-size: 13px; color: #555; }
-
-    /* LOAD MORE */
-    .load-more-wrap { text-align: center; margin-top: 2rem; display: none; }
-    .load-more-wrap.on { display: block; }
-
-    .load-more-btn {
-      font-family: 'Space Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.5px;
-      padding: 11px 24px;
-      border: 1px solid #2a2a2a;
-      background: transparent;
-      color: #888;
-      cursor: pointer;
-      border-radius: 3px;
-      transition: all 0.15s;
-    }
-
-    .load-more-btn:hover { border-color: #555; color: #e8e6df; }
-
-    /* TOAST */
-    .toast {
-      position: fixed;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #1a0e0e;
-      border: 1px solid #3a1a1a;
-      color: #e05252;
-      font-family: 'Space Mono', monospace;
-      font-size: 11px;
-      padding: 10px 20px;
-      border-radius: 4px;
-      display: none;
-      z-index: 200;
-      white-space: nowrap;
-    }
-    .toast.on { display: block; }
-
-    /* SECTION DIVIDER for curated */
-    .section-divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 1.5rem 0 1rem;
-    }
-
-    .section-divider-label {
-      font-family: 'Space Mono', monospace;
-      font-size: 9px;
-      letter-spacing: 2px;
-      color: #444;
-      white-space: nowrap;
-    }
-
-    .section-divider-line {
-      flex: 1;
-      height: 1px;
-      background: #222;
-    }
-
-    @media (max-width: 720px) {
-      nav { padding: 1rem 1.25rem; }
-      .cat-bar { padding: 0 1rem; }
-      .main { padding: 1.25rem 1rem; }
-      .card.featured { grid-column: span 1; }
-      .cards-grid { grid-template-columns: 1fr; gap: 8px; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Designdigest · Today in design, in one place</title>
+<meta name="description" content="The latest from Smashing Magazine, UX Collective, Nielsen Norman, Awwwards, Creative Bloq, Abduzeedo and more, sorted by date. Save what you want to read later.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#faf9f6;--card:#fff;--ink:#16140f;--muted:#6b675e;--line:#e7e3da;--soft:#f1eee7;--accent:#d9381e;--mono:'JetBrains Mono',ui-monospace,monospace;--serif:Newsreader,Georgia,serif}
+@media (prefers-color-scheme:dark){:root{--bg:#100f0d;--card:#181714;--ink:#efece5;--muted:#a19c91;--line:#2b2924;--soft:#201e1a;--accent:#ff6a4d}}
+*{box-sizing:border-box;margin:0}[hidden]{display:none!important}
+body{font:15px/1.55 Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}
+.wrap{max-width:1280px;margin:0 auto;padding:0 24px}
+.top{border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;padding-top:14px;padding-bottom:14px}
+.date{font:500 .72rem var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.top a{font-size:.78rem;color:var(--muted)}
+.mast{text-align:center;padding:30px 0 22px;border-bottom:3px double var(--line)}
+.mast h1{font:600 clamp(2.6rem,7vw,5rem)/1 var(--serif);letter-spacing:-.03em}
+.mast h1 i{color:var(--accent)}
+.mast p{color:var(--muted);margin-top:8px;font-size:.92rem}
+.live{display:inline-flex;align-items:center;gap:6px;font:500 .7rem var(--mono);color:var(--muted);margin-top:10px}
+.live b{width:7px;height:7px;border-radius:50%;background:#16a34a;animation:p 2s infinite}
+@keyframes p{50%{opacity:.35}}
+.bar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;gap:12px;align-items:center;padding-top:10px;padding-bottom:10px;flex-wrap:wrap}
+.cats{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.cats button{border:0;background:none;border-radius:999px;padding:7px 13px;font-weight:600;font-size:.86rem;color:var(--muted);white-space:nowrap;display:flex;gap:6px;align-items:center}
+.cats button span{font:500 .7rem var(--mono);opacity:.7}
+.cats button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.search{margin-left:auto;display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:var(--card);min-width:220px}
+.search input{border:0;background:none;outline:none;width:100%;font-size:.86rem}
+.icon-btn{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:7px 12px;font-size:.82rem;font-weight:600;display:flex;gap:6px;align-items:center}
+.icon-btn:hover{border-color:var(--ink)}
+.icon-btn:disabled{opacity:.5;cursor:wait}
+main{padding:28px 0 40px}
+.lead{display:grid;grid-template-columns:1.6fr 1fr;gap:28px;padding-bottom:28px;border-bottom:1px solid var(--line);margin-bottom:28px}
+.hero-card .img{aspect-ratio:16/9;border-radius:16px}
+.hero-card h2{font:600 clamp(1.7rem,3vw,2.4rem)/1.12 var(--serif);letter-spacing:-.02em;margin-top:14px}
+.hero-card p{color:var(--muted);margin-top:8px;max-width:62ch}
+.side-list{display:grid;gap:0;align-content:start}
+.side-list h3{font:500 .72rem var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding-bottom:10px;border-bottom:1px solid var(--line)}
+.row{display:grid;grid-template-columns:28px 1fr;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.row b{font:600 1.3rem/1 var(--serif);color:var(--accent)}
+.row h4{font:600 1.08rem/1.25 var(--serif)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:26px 22px}
+.card{display:flex;flex-direction:column;gap:10px;position:relative}
+.img{position:relative;aspect-ratio:3/2;border-radius:12px;overflow:hidden;background:var(--soft)}
+.img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s}
+a:hover .img img{transform:scale(1.03)}
+.ph{position:absolute;inset:0;display:grid;place-items:center;padding:18px;text-align:center;background:var(--ph)}
+.ph span{font:600 1.25rem/1.15 var(--serif);color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.2)}
+.meta{display:flex;gap:8px;align-items:center;font:500 .7rem var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);flex-wrap:wrap}
+.meta .src{color:var(--ink)}
+.meta .c{color:var(--accent)}
+.card h3{font:600 1.22rem/1.22 var(--serif);letter-spacing:-.01em}
+a:hover h3,a:hover h2,a:hover h4{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.card p{font-size:.88rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.save{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.92);color:#111;display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.15);z-index:2;opacity:0;transition:opacity .15s}
+.card:hover .save,.save[aria-pressed=true],.save:focus-visible{opacity:1}
+.save[aria-pressed=true]{background:var(--accent);color:#fff}
+@media (hover:none){.save{opacity:1}}
+.more{display:flex;justify-content:center;margin-top:34px}
+.more button{border:1px solid var(--ink);background:none;border-radius:999px;padding:11px 22px;font-weight:600}
+.empty{text-align:center;color:var(--muted);padding:60px 20px;border:1.5px dashed var(--line);border-radius:16px}
+.empty b{display:block;color:var(--ink);font:600 1.3rem var(--serif);margin-bottom:4px}
+.skel{border-radius:12px;background:linear-gradient(90deg,var(--soft),var(--card),var(--soft));background-size:200% 100%;animation:sh 1.3s linear infinite}
+@keyframes sh{to{background-position:-200% 0}}
+.always{margin-top:56px;padding-top:24px;border-top:3px double var(--line)}
+.always h2{font:600 1.6rem var(--serif);letter-spacing:-.02em}
+.always > p{color:var(--muted);font-size:.9rem;margin:4px 0 16px}
+.sites{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.site{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--card);display:grid;gap:2px;transition:border-color .15s}
+.site:hover{border-color:var(--ink)}
+.site b{font-size:.92rem}.site span{font-size:.78rem;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.site small{font:500 .64rem var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+.sources{font:500 .7rem var(--mono);color:var(--muted);margin-top:30px;line-height:1.9}
+.sources s{opacity:.6}
+.toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:.86rem;opacity:0;transition:.25s;pointer-events:none;z-index:9}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.foot{padding:20px 0 34px;font-size:.8rem;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;border-top:1px solid var(--line);margin-top:30px}.foot a{text-decoration:underline}
+@media (max-width:900px){.lead{grid-template-columns:1fr}.search{order:3;margin-left:0;width:100%}}
+@media (max-width:560px){.wrap{padding:0 16px}.top a{display:none}.mast{padding:22px 0 16px}.grid{grid-template-columns:1fr;gap:22px}.card{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:start}.card .img{aspect-ratio:1}.card .ph span{font-size:.8rem}.card p{display:none}.card h3{font-size:1.05rem}.card .txt{display:grid;gap:4px}.save{width:28px;height:28px;top:6px;right:auto;left:80px}.card.hero-card{display:flex;flex-direction:column}.hero-card .img{aspect-ratio:16/10}.hero-card .save{left:auto;right:10px}.hero-card h2{font-size:1.6rem}}
+</style>
 </head>
 <body>
-
-<nav>
-  <div class="nav-left">
-    <span class="nav-logo">Designdigest</span>
-    <span class="nav-day">SHIP69 / DAY 63</span>
-  </div>
-  <div class="nav-right">
-    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
-    <button class="refresh-btn" id="refreshBtn" onclick="fetchFeed()">↻ Refresh</button>
-  </div>
-</nav>
-
-<div class="sources-bar">
-  <span class="sources-label">Sources:</span>
-  <div class="sources-scroll">
-    <span class="source-tag">Dribbble</span>
-    <span class="source-tag">Mobbin</span>
-    <span class="source-tag">Awwwards</span>
-    <span class="source-tag">Freepik</span>
-    <span class="source-tag">Behance</span>
-    <span class="source-tag">Layers.to</span>
-    <span class="source-tag">Godly</span>
-    <span class="source-tag">Design Milk</span>
-    <span class="source-tag">UX Collective</span>
-    <span class="source-tag">Smashing Mag</span>
-    <span class="source-tag">Codrops</span>
-    <span class="source-tag">CSS-Tricks</span>
-    <span class="source-tag">Abduzeedo</span>
-    <span class="source-tag">Nielsen Norman</span>
-    <span class="source-tag">Dribbble Jobs</span>
-    <span class="source-tag">Sidebar.io</span>
-  </div>
-</div>
-
-<div class="cat-bar">
-  <button class="cat-btn active" data-cat="all"         onclick="setCategory('all')">All <span class="cat-count" id="cnt-all">—</span></button>
-  <button class="cat-btn" data-cat="inspiration"        onclick="setCategory('inspiration')">✦ Inspiration <span class="cat-count" id="cnt-inspiration">—</span></button>
-  <button class="cat-btn" data-cat="tools"              onclick="setCategory('tools')">⚡ Tools <span class="cat-count" id="cnt-tools">—</span></button>
-  <button class="cat-btn" data-cat="articles"           onclick="setCategory('articles')">◎ Articles <span class="cat-count" id="cnt-articles">—</span></button>
-  <button class="cat-btn" data-cat="jobs"               onclick="setCategory('jobs')">◈ Jobs <span class="cat-count" id="cnt-jobs">—</span></button>
-</div>
-
-<div class="main">
-
-  <div class="inline-loader on" id="loader">
-    <div class="loader-dots">
-      <div class="loader-dot"></div>
-      <div class="loader-dot"></div>
-      <div class="loader-dot"></div>
-    </div>
-    <div class="loader-msg" id="loaderMsg">Connecting to design sources across the web...</div>
-    <div class="loader-sources">
-      <span class="loader-source-pill">Awwwards</span>
-      <span class="loader-source-pill">UX Collective</span>
-      <span class="loader-source-pill">Smashing Mag</span>
-      <span class="loader-source-pill">Codrops</span>
-      <span class="loader-source-pill">Dribbble Jobs</span>
-      <span class="loader-source-pill">Design Milk</span>
-    </div>
-  </div>
-
-  <div id="feedWrap" style="display:none">
-    <div class="feed-meta">
-      <span class="feed-label" id="feedLabel">All — Latest</span>
-      <span class="feed-updated" id="feedUpdated"></span>
-    </div>
-    <div class="cards-grid" id="cardsGrid"></div>
-    <div class="load-more-wrap" id="loadMoreWrap">
-      <button class="load-more-btn" onclick="loadMore()">Load more →</button>
-    </div>
-  </div>
-
-</div>
-
-<div class="toast" id="toast"></div>
-
+<div class="top"><div class="wrap"><span class="date" id="today"></span><a href="https://neeleshagrawal.vercel.app" target="_blank" rel="noopener">A Ship69 tool by Neelesh ↗</a></div></div>
+<header class="wrap mast"><h1>Design<i>digest</i></h1><p>Today in design, from the sources worth reading. Sorted by date, nothing algorithmic.</p><div class="live"><b></b><span id="updated">Fetching the latest…</span></div></header>
+<nav class="bar" aria-label="Filters"><div class="wrap">
+  <div class="cats" id="cats"></div>
+  <label class="search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search titles and sources" aria-label="Search"></label>
+  <button class="icon-btn" id="refresh" aria-label="Refresh feed"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg>Refresh</button>
+</div></nav>
+<main class="wrap" id="main" aria-live="polite">
+  <div id="feed"></div>
+  <section class="always"><h2>Always worth a visit</h2><p>Galleries and libraries without a useful feed, kept here so they are one click away.</p><div class="sites" id="sites"></div></section>
+  <div class="sources" id="sources"></div>
+</main>
+<div class="wrap foot"><span>Designdigest · made during Ship69, rebuilt Oct 2026.</span><a href="https://neeleshagrawal.vercel.app" target="_blank" rel="noopener">neeleshagrawal.vercel.app</a></div>
+<div class="toast" id="toast" role="status"></div>
 <script>
-  // Curated inspiration sources — always shown in inspiration + all tabs
-  const CURATED = [
+const CURATED = [
     {
       category: 'inspiration',
       title: 'Dribbble — Design inspiration from the world\'s best designers',
@@ -646,143 +212,82 @@
       curated: true
     },
   ];
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const CATS = [['all', 'Latest'], ['articles', 'Articles'], ['inspiration', 'Inspiration'], ['tools', 'Tools'], ['jobs', 'Jobs'], ['saved', 'Saved']];
+const PAGE = 18;
+let items = [], cat = 'all', q = '', shown = PAGE;
+let saved = []; try { saved = JSON.parse(localStorage.getItem('dd-saved') || '[]'); } catch {}
+const persist = () => { try { localStorage.setItem('dd-saved', JSON.stringify(saved)); } catch {} };
+const isSaved = url => saved.some(s => s.url === url);
 
-  let liveItems = [];
-  let allItems = [];
-  let currentCat = 'all';
-  let shown = 15;
-  const PAGE = 15;
+$('#today').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+const ago = iso => { if (!iso) return ''; const m = (Date.now() - new Date(iso)) / 6e4; if (m < 60) return Math.max(1, Math.round(m)) + 'm ago'; if (m < 1440) return Math.round(m / 60) + 'h ago'; const d = Math.round(m / 1440); return d < 8 ? d + 'd ago' : new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); };
+// stable warm gradient per source for posts without an image
+const hue = s => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) % 360, 7);
+const ph = it => `<div class="ph" style="--ph:linear-gradient(135deg,hsl(${hue(it.source)} 55% 42%),hsl(${(hue(it.source) + 40) % 360} 60% 30%))"><span>${esc(it.source)}</span></div>`;
+const img = it => `<div class="img">${it.image ? `<img src="${esc(it.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('div'),{outerHTML:''}));">` : ''}${it.image ? '' : ph(it)}</div>`;
+const saveBtn = it => `<button class="save" data-url="${esc(it.url)}" aria-pressed="${isSaved(it.url)}" aria-label="${isSaved(it.url) ? 'Remove from saved' : 'Save for later'}"><svg width="14" height="14" viewBox="0 0 24 24" fill="${isSaved(it.url) ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M6 3h12v18l-6-4-6 4z"/></svg></button>`;
+const meta = it => `<div class="meta"><span class="src">${esc(it.source)}</span>${cat === 'all' || cat === 'saved' ? `<span class="c">${esc(it.category)}</span>` : ''}<span>${ago(it.date)}</span></div>`;
 
-  const catLabels = { all: 'All', inspiration: 'Inspiration', tools: 'Tools', articles: 'Articles', jobs: 'Jobs' };
-
-  const loaderMsgs = [
-    'Connecting to design sources across the web...',
-    'Reading Smashing Magazine and UX Collective...',
-    'Scanning Codrops, CSS-Tricks, and Awwwards...',
-    'Checking Dribbble Jobs and Design Milk...',
-    'Groq is categorising and curating...',
-    'Almost ready...',
-  ];
-
-  function buildAllItems() {
-    // Mix curated + live, curated first in inspiration
-    const live = liveItems.filter(i => !i.curated);
-    allItems = [...CURATED, ...live];
+function list() {
+  const base = cat === 'saved' ? saved : cat === 'all' ? items : items.filter(i => i.category === cat);
+  const t = q.toLowerCase();
+  return t ? base.filter(i => (i.title + ' ' + i.source + ' ' + i.description).toLowerCase().includes(t)) : base;
+}
+function renderCats() {
+  const n = c => c === 'saved' ? saved.length : c === 'all' ? items.length : items.filter(i => i.category === c).length;
+  $('#cats').innerHTML = CATS.filter(([c]) => c === 'all' || c === 'saved' || n(c)).map(([c, l]) => `<button data-c="${c}" aria-pressed="${c === cat}">${l}<span>${n(c)}</span></button>`).join('');
+}
+function render() {
+  renderCats();
+  const all = list();
+  if (!all.length) { $('#feed').innerHTML = `<div class="empty"><b>${cat === 'saved' ? 'Nothing saved yet' : 'No matches'}</b>${cat === 'saved' ? 'Tap the bookmark on any story to keep it here.' : 'Try a different search or section.'}</div>`; return; }
+  const withImg = all.find(i => i.image);
+  const leadable = cat !== 'saved' && !q && withImg;
+  const lead = leadable ? withImg : null, rest = all.filter(i => i !== lead);
+  const side = lead ? rest.slice(0, 4) : [], grid = rest.slice(side.length, side.length + shown);
+  $('#feed').innerHTML = (lead ? `<section class="lead"><a class="hero-card card" href="${esc(lead.url)}" target="_blank" rel="noopener">${saveBtn(lead)}${img(lead)}${meta(lead)}<h2>${esc(lead.title)}</h2><p>${esc(lead.description)}</p></a>
+      <div class="side-list"><h3>Also new</h3>${side.map((it, i) => `<a class="row" href="${esc(it.url)}" target="_blank" rel="noopener"><b>${i + 1}</b><div>${meta(it)}<h4>${esc(it.title)}</h4></div></a>`).join('')}</div></section>` : '')
+    + `<div class="grid">${grid.map(it => `<a class="card" href="${esc(it.url)}" target="_blank" rel="noopener">${saveBtn(it)}${img(it)}<div class="txt">${meta(it)}<h3>${esc(it.title)}</h3><p>${esc(it.description)}</p></div></a>`).join('')}</div>`
+    + (rest.length > side.length + shown ? `<div class="more"><button id="more">Show more · ${rest.length - side.length - shown} left</button></div>` : '');
+}
+$('#cats').onclick = e => { const b = e.target.closest('button'); if (!b) return; cat = b.dataset.c; shown = PAGE; render(); };
+let qt; $('#q').oninput = e => { clearTimeout(qt); qt = setTimeout(() => { q = e.target.value.trim(); shown = PAGE; render(); }, 150); };
+$('#feed').addEventListener('click', e => {
+  const s = e.target.closest('.save');
+  if (s) {
+    e.preventDefault(); e.stopPropagation();
+    const url = s.dataset.url;
+    if (isSaved(url)) { saved = saved.filter(x => x.url !== url); toast('Removed from saved'); }
+    else { const it = items.find(i => i.url === url) || saved.find(i => i.url === url); if (it) saved.unshift(it); toast('Saved for later'); }
+    persist(); render(); return;
   }
+  if (e.target.id === 'more') { shown += PAGE; render(); }
+});
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('on'), 1600); }
 
-  function setCategory(cat) {
-    currentCat = cat;
-    shown = PAGE;
-    document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
-    renderFeed();
+$('#sites').innerHTML = CURATED.map(c => `<a class="site" href="${esc(c.url)}" target="_blank" rel="noopener"><small>${esc(c.category)}</small><b>${esc(c.source)}</b><span>${esc(c.description)}</span></a>`).join('');
+
+async function load() {
+  $('#refresh').disabled = true; $('#updated').textContent = 'Fetching the latest…';
+  if (!items.length) $('#feed').innerHTML = `<section class="lead"><div class="skel" style="aspect-ratio:16/9"></div><div style="display:grid;gap:12px">${'<div class="skel" style="height:64px"></div>'.repeat(4)}</div></section><div class="grid">${'<div class="skel" style="aspect-ratio:3/2"></div>'.repeat(6)}</div>`;
+  try {
+    const r = await fetch('/api/designdigest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    if (!r.ok) throw 0;
+    const d = await r.json();
+    items = (d.items || []).filter(i => i.title && i.url);
+    if (!items.length) throw 0;
+    $('#updated').textContent = `${items.length} stories · updated ${new Date(d.fetchedAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    $('#sources').innerHTML = 'Sources: ' + (d.sources || []).map(s => s.ok ? esc(s.source) : `<s title="Unavailable right now">${esc(s.source)}</s>`).join(' · ');
+  } catch {
+    $('#updated').textContent = 'Live feed unavailable. Showing saved stories and favourite sites.';
+    if (!items.length && saved.length) cat = 'saved';
   }
-
-  function getFiltered() {
-    return currentCat === 'all' ? allItems : allItems.filter(i => i.category === currentCat);
-  }
-
-  function escHtml(str) {
-    return String(str || '')
-      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ')
-      .replace(/<[^>]*>/g, '').trim().slice(0, 300);
-  }
-
-  function renderFeed() {
-    const filtered = getFiltered();
-    const grid = document.getElementById('cardsGrid');
-    const toShow = filtered.slice(0, shown);
-
-    document.getElementById('feedLabel').textContent = `${catLabels[currentCat]} — Latest`;
-    document.getElementById('feedUpdated').textContent = `Updated ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`;
-
-    // Update counts
-    ['all','inspiration','tools','articles','jobs'].forEach(cat => {
-      const count = cat === 'all' ? allItems.length : allItems.filter(i => i.category === cat).length;
-      document.getElementById(`cnt-${cat}`).textContent = count || '0';
-    });
-
-    if (toShow.length === 0) {
-      grid.innerHTML = `<div class="empty"><div class="empty-title">Nothing in this category yet</div><div class="empty-sub">Try refreshing or switch to another tab</div></div>`;
-      document.getElementById('loadMoreWrap').classList.remove('on');
-      return;
-    }
-
-    grid.innerHTML = toShow.map((item, i) => {
-      const isFeatured = i === 0 && currentCat === 'all';
-      const tags = (item.tags || []).slice(0, 2).map(t => `<span class="tag">${escHtml(t)}</span>`).join('');
-      const curatedClass = item.curated ? ' curated' : '';
-      return `<a class="card${isFeatured ? ' featured' : ''}${curatedClass}" href="${item.url || '#'}" target="_blank" rel="noopener noreferrer">
-        <div class="card-top">
-          <span class="cat-pill ${item.category || 'articles'}">${item.category || 'articles'}</span>
-          <span class="card-source">${escHtml(item.source)}</span>
-        </div>
-        <div class="card-body">
-          <div class="card-title">${escHtml(item.title)}</div>
-          <div class="card-desc">${escHtml(item.description)}</div>
-        </div>
-        <div class="card-footer">
-          <div class="card-tags">${tags}</div>
-          <span class="card-arrow">↗</span>
-        </div>
-      </a>`;
-    }).join('');
-
-    document.getElementById('loadMoreWrap').classList.toggle('on', filtered.length > shown);
-  }
-
-  function loadMore() {
-    shown += PAGE;
-    renderFeed();
-  }
-
-  function showToast(msg, dur = 4000) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('on');
-    setTimeout(() => t.classList.remove('on'), dur);
-  }
-
-  async function fetchFeed() {
-    const refreshBtn = document.getElementById('refreshBtn');
-    const loader = document.getElementById('loader');
-    const feedWrap = document.getElementById('feedWrap');
-    const loaderMsg = document.getElementById('loaderMsg');
-
-    refreshBtn.disabled = true;
-    feedWrap.style.display = 'none';
-    loader.classList.add('on');
-    liveItems = [];
-    shown = PAGE;
-
-    let mi = 0;
-    const lt = setInterval(() => { mi = (mi + 1) % loaderMsgs.length; loaderMsg.textContent = loaderMsgs[mi]; }, 2000);
-
-    try {
-      const res = await fetch('/api/designdigest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ts: Date.now() })
-      });
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      liveItems = (data.items || []).filter(i => i.title && i.url);
-
-    } catch (e) {
-      showToast('Live feed failed — showing curated sources.');
-    }
-
-    buildAllItems();
-    clearInterval(lt);
-    loader.classList.remove('on');
-    feedWrap.style.display = 'block';
-    refreshBtn.disabled = false;
-    renderFeed();
-  }
-
-  fetchFeed();
+  render(); $('#refresh').disabled = false;
+}
+$('#refresh').onclick = load;
+load();
 </script>
-
 </body>
 </html>
